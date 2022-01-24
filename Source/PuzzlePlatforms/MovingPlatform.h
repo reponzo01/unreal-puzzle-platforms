@@ -19,6 +19,9 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 
+	void AddActiveTrigger();
+	void RemoveActiveTrigger();
+
 private:
 	UPROPERTY(EditAnywhere)
 	float Speed = 200.f;
@@ -28,4 +31,7 @@ private:
 
 	FVector GlobalTargetLocation;
 	FVector GlobalStartLocation;
+
+	UPROPERTY(EditAnywhere)
+	int32 ActiveTriggers = 0;
 };
