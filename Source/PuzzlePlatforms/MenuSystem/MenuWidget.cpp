@@ -20,9 +20,8 @@ void UMenuWidget::Setup()
 	PlayerController->bShowMouseCursor = true;
 }
 
-void UMenuWidget::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
+void UMenuWidget::Teardown()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Calling OnLevelRemovedFromWorld"));
 	this->RemoveFromViewport();
 	UWorld* World = GetWorld();
 	if (!ensure(World != nullptr)) return;

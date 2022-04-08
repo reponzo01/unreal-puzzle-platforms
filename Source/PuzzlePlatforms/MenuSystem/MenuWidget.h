@@ -19,8 +19,8 @@ public:
 	void SetMenuInterface(IMenuInterface* _MenuInterface);
 
 	void Setup();
-	void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
-
+	void Teardown();
+	
 protected:
 	IMenuInterface* MenuInterface;
 	
