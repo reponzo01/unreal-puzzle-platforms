@@ -37,7 +37,6 @@ void UPuzzlePlatformsGameInstance::LoadMenu()
 
 void UPuzzlePlatformsGameInstance::Host()
 {
-
 	UEngine* Engine = GetEngine();
 	if (!ensure(Engine != nullptr)) return;
 
