@@ -119,6 +119,7 @@ void UPuzzlePlatformsGameInstance::RefreshServerList()
 	if (SessionSearch.IsValid())
 	{
 		//SessionSearch->bIsLanQuery = true;
+		SessionSearch->MaxSearchResults = 100;
 		SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 		UE_LOG(LogTemp, Warning, TEXT("Starting to find session"));
 		SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
@@ -136,18 +137,19 @@ void UPuzzlePlatformsGameInstance::OnDestroySessionComplete(FName SessionName, b
 
 void UPuzzlePlatformsGameInstance::OnFindSessionsComplete(bool Success)
 {
+	UE_LOG(LogTemp, Warning, TEXT("In OnFindSessionsComplete %d"), Success);
 	if (Success && SessionSearch.IsValid() && Menu != nullptr)
 	{
-		if (SessionSearch->SearchResults.Num() > 0)
+		TArray<FString> ServerNames;
+		ServerNames.Add("Test Server 1");
+		ServerNames.Add("Test Server 2");
+		ServerNames.Add("Test Server 3");
+		for (const FOnlineSessionSearchResult& SearchResult : SessionSearch->SearchResults)
 		{
-			TArray<FString> ServerNames;
-			for (const FOnlineSessionSearchResult& SearchResult : SessionSearch->SearchResults)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Session found %s."), *SearchResult.GetSessionIdStr());
-				ServerNames.Add(SearchResult.GetSessionIdStr());
-			}
-			Menu->SetServerList(ServerNames);
-		}		
+			UE_LOG(LogTemp, Warning, TEXT("Session found %s."), *SearchResult.GetSessionIdStr());
+			ServerNames.Add(SearchResult.GetSessionIdStr());
+		}
+		Menu->SetServerList(ServerNames);
 	}
 }
 
