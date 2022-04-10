@@ -14,6 +14,7 @@
 #include "MenuSystem/MenuWidget.h"
 
 const static FName SESSION_NAME = TEXT("My Session Game");
+const static FName SERVER_NAME_SETTINGS_KEY = TEXT("ServerName");
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance(const FObjectInitializer& ObjectInitializer)
 {
@@ -59,8 +60,20 @@ void UPuzzlePlatformsGameInstance::LoadMenuWidget()
 	Menu->SetMenuInterface(this);
 }
 
-void UPuzzlePlatformsGameInstance::Host()
+void UPuzzlePlatformsGameInstance::InGameLoadMenu()
 {
+	if (!ensure(InGameMenuClass != nullptr)) return;
+	UMenuWidget* InGameMenu = CreateWidget<UMenuWidget>(this, InGameMenuClass);
+	if (!ensure(InGameMenu != nullptr)) return;
+
+	InGameMenu->Setup();
+
+	InGameMenu->SetMenuInterface(this);
+}
+
+void UPuzzlePlatformsGameInstance::Host(FString ServerName)
+{
+	DesiredServerName = ServerName;
 	if (SessionInterface.IsValid())
 	{
 		auto ExistingSession = SessionInterface->GetNamedSession(SESSION_NAME);
@@ -94,20 +107,10 @@ void UPuzzlePlatformsGameInstance::CreateSession()
 		SessionSettings.NumPublicConnections = 2;
 		SessionSettings.bShouldAdvertise = true;
 		SessionSettings.bUsesPresence = true;
+		SessionSettings.Set(SERVER_NAME_SETTINGS_KEY, DesiredServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
 		SessionInterface->CreateSession(0, SESSION_NAME, SessionSettings);
 	}
-}
-
-void UPuzzlePlatformsGameInstance::InGameLoadMenu()
-{
-	if (!ensure(InGameMenuClass != nullptr)) return;
-	UMenuWidget* InGameMenu = CreateWidget<UMenuWidget>(this, InGameMenuClass);
-	if (!ensure(InGameMenu != nullptr)) return;
-
-	InGameMenu->Setup();
-
-	InGameMenu->SetMenuInterface(this);
 }
 
 void UPuzzlePlatformsGameInstance::OnCreateSessionComplete(FName SessionName, bool Success)
@@ -165,6 +168,15 @@ void UPuzzlePlatformsGameInstance::OnFindSessionsComplete(bool Success)
 			Data.MaxPlayers = SearchResult.Session.SessionSettings.NumPublicConnections;
 			Data.CurrentPlayers = Data.MaxPlayers - SearchResult.Session.NumOpenPublicConnections;
 			Data.HostUserName = SearchResult.Session.OwningUserName;
+			FString ServerName;
+			if (SearchResult.Session.SessionSettings.Get(SERVER_NAME_SETTINGS_KEY, ServerName))
+			{
+				Data.Name = ServerName;
+			}
+			else
+			{
+				Data.Name = "Could not find name.";
+			}
 			ServerNames.Add(Data);
 		}
 		Menu->SetServerList(ServerNames);
