@@ -47,6 +47,11 @@ void UPuzzlePlatformsGameInstance::Init()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found no subsystem class"));
 	}
+
+	if (GEngine != nullptr)
+	{
+		GEngine->OnNetworkFailure().AddUObject(this, &UPuzzlePlatformsGameInstance::OnNetworkFailure);
+	}
 }
 
 void UPuzzlePlatformsGameInstance::LoadMenuWidget()
@@ -95,6 +100,11 @@ void UPuzzlePlatformsGameInstance::OnDestroySessionComplete(FName SessionName, b
 		UE_LOG(LogTemp, Warning, TEXT("Session destroyed."));
 		CreateSession();
 	}
+}
+
+void UPuzzlePlatformsGameInstance::OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString)
+{
+	LoadMainMenu();
 }
 
 void UPuzzlePlatformsGameInstance::CreateSession()
@@ -222,6 +232,14 @@ void UPuzzlePlatformsGameInstance::OnJoinSessionComplete(FName SessionName, EOnJ
 		Address,
 		ETravelType::TRAVEL_Absolute
 	);
+}
+
+void UPuzzlePlatformsGameInstance::StartSession()
+{
+	if (SessionInterface.IsValid())
+	{
+		SessionInterface->StartSession(SESSION_NAME);
+	}
 }
 
 void UPuzzlePlatformsGameInstance::LoadMainMenu()
